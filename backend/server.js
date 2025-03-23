@@ -71,6 +71,28 @@ app.post("/login", async (req, res) => {
     }
 });
 
+app.post("/admin/add-room", async (req, res) => {
+    const { roomType, price, features, guests, amenities } = req.body;
+    
+    try {
+        await sql.connect(dbConfig);
+        await sql.query`INSERT INTO Rooms (roomType, price, features, guests, amenities) VALUES (${roomType}, ${price}, ${features}, ${guests}, ${amenities})`;
+        res.json({ message: "Room added successfully!" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to add room!" });
+    }
+});
+app.get("/rooms", async (req, res) => {
+    try {
+        await sql.connect(dbConfig);
+        const result = await sql.query("SELECT * FROM Rooms");
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch rooms!" });
+    }
+});
+
+
 app.get("/", (req, res) => {
     res.send("API is Running...");
 });
