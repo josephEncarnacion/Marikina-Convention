@@ -61,12 +61,24 @@ app.post("/login", async (req, res) => {
         const user = result.recordset[0];
 
         if (user && (await bcrypt.compare(password, user.password))) {
-            const token = jwt.sign({ username, role: user.role }, "secret_key", { expiresIn: "1h" });
-            res.json({ token, role: user.role });
+            // Include user ID in the JWT payload
+            const token = jwt.sign(
+                { username, role: user.role, userId: user.id }, 
+                "secret_key", 
+                { expiresIn: "1h" }
+            );
+            
+            // Return user ID along with token and role
+            res.json({ 
+                token, 
+                role: user.role,
+                userId: user.id 
+            });
         } else {
             res.status(401).json({ error: "Invalid credentials" });
         }
     } catch (err) {
+        console.error("Login error:", err);
         res.status(500).json({ error: "Login failed!" });
     }
 });
