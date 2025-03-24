@@ -103,6 +103,25 @@ app.get("/rooms", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch rooms!" });
     }
 });
+app.post("/reserve-room", async (req, res) => {
+    const { userId, roomId, checkInDate, checkOutDate } = req.body;
+
+    if (!userId || !roomId || !checkInDate || !checkOutDate) {
+        return res.status(400).json({ error: "User ID, Room ID, Check-in Date, and Check-out Date are required!" });
+    }
+
+    try {
+        await sql.connect(dbConfig);
+        await sql.query`
+            INSERT INTO Reservations (userId, roomId, checkInDate, checkOutDate, status) 
+            VALUES (${userId}, ${roomId}, ${checkInDate}, ${checkOutDate}, 'pending')`;
+
+        res.json({ message: "Room reserved successfully!" });
+    } catch (err) {
+        console.error("Error reserving room:", err);
+        res.status(500).json({ error: "Reservation failed!" });
+    }
+});
 
 
 app.get("/", (req, res) => {
